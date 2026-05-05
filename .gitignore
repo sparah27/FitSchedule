@@ -1,8 +1,18 @@
 HELP.md
 target/
+**/target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Claude ###
+.claude/
+
+### Frontend ###
+node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
 
 ### STS ###
 .apt_generated
@@ -31,3 +41,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
+logs/
+
+### Env ###
+.env
+.env.local
+*.pem
+
+### Maven ###
+*.versionsBackup
+dependency-reduced-pom.xml
