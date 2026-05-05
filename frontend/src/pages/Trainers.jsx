@@ -8,20 +8,29 @@ export default function Trainers() {
   const [trainers, setTrainers] = useState([])
   const [filter, setFilter] = useState('All')
   const [loading, setLoading] = useState(true)
+<<<<<<< HEAD
   const [error, setError] = useState(null)
+=======
+>>>>>>> d6dbe8b820672b31a665999cf73d75fc74091425
   const navigate = useNavigate()
 
   useEffect(() => {
     const fetchTrainers = async () => {
       setLoading(true)
+<<<<<<< HEAD
       setError(null)
+=======
+>>>>>>> d6dbe8b820672b31a665999cf73d75fc74091425
       try {
         const data = await getTrainers(filter)
         setTrainers(data)
       } catch (err) {
+<<<<<<< HEAD
         const status = err.response?.status
         const msg = err.response?.data?.message
         setError(`Failed to load trainers (${status ?? 'network error'}${msg ? ': ' + msg : ''}). Please try again.`)
+=======
+>>>>>>> d6dbe8b820672b31a665999cf73d75fc74091425
         console.error('Failed to fetch trainers', err)
       } finally {
         setLoading(false)
@@ -47,10 +56,13 @@ export default function Trainers() {
 
         {loading ? (
           <div className="text-center text-gray-500 py-12">Loading trainers...</div>
+<<<<<<< HEAD
         ) : error ? (
           <div className="text-center text-red-500 py-12">{error}</div>
         ) : trainers.length === 0 ? (
           <div className="text-center text-gray-500 py-12">No trainers found.</div>
+=======
+>>>>>>> d6dbe8b820672b31a665999cf73d75fc74091425
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {trainers.map((trainer) => (

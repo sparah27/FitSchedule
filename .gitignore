@@ -7,9 +7,12 @@ target/
 
 ### Frontend ###
 node_modules/
+dist/
+dist-ssr/
 frontend/dist/
 frontend/.env
 frontend/.env.local
+*.local
 
 ### STS ###
 .apt_generated
@@ -38,15 +41,25 @@ build/
 
 ### VS Code ###
 .vscode/
-
+!.vscode/extensions.json
 
 ### OS ###
 .DS_Store
 Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 ### Logs ###
 *.log
 logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 ### Env ###
 .env

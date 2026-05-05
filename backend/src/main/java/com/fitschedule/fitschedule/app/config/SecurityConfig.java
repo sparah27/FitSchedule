@@ -1,7 +1,7 @@
-package com.fitschedule.backend.fitschedule.app.config;
+package com.fitschedule.fitschedule.app.config;
 
-import com.fitschedule.backend.fitschedule.app.security.CustomUserDetailsService;
-import com.fitschedule.backend.fitschedule.app.security.JwtAuthenticationFilter;
+import com.fitschedule.fitschedule.app.security.CustomUserDetailsService;
+import com.fitschedule.fitschedule.app.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
