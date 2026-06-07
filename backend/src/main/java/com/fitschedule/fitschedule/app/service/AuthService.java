@@ -5,6 +5,7 @@ import com.fitschedule.fitschedule.app.dto.request.RegisterRequest;
 import com.fitschedule.fitschedule.app.dto.response.AuthResponse;
 import com.fitschedule.fitschedule.app.exception.EmailAlreadyExistsException;
 import com.fitschedule.fitschedule.app.exception.InvalidCredentialsException;
+import com.fitschedule.fitschedule.app.model.entity.Admin;
 import com.fitschedule.fitschedule.app.model.entity.Client;
 import com.fitschedule.fitschedule.app.model.entity.Trainer;
 import com.fitschedule.fitschedule.app.model.entity.User;
@@ -75,6 +76,7 @@ public class AuthService {
         String role;
         if (user instanceof Trainer) role = "TRAINER";
         else if (user instanceof Client) role = "CLIENT";
+        else if (user instanceof Admin) role = "ADMIN";
         else role = "USER";
 
         return AuthResponse.builder()

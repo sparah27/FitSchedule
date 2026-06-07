@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getTrainerById, getTrainerAvailability } from '../services/trainerService'
 import BookingModal from '../components/BookingModal'
 import { createBooking } from '../services/bookingService'
+import { getTrainerReviews } from '../services/reviewService'
 
 export default function TrainerProfile() {
   const { id } = useParams()
@@ -11,6 +12,7 @@ export default function TrainerProfile() {
   const [slots, setSlots] = useState([])
   const [selectedSlot, setSelectedSlot] = useState(null)
   const [bookedSlots, setBookedSlots] = useState([])
+  const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -28,6 +30,9 @@ export default function TrainerProfile() {
 
         const availabilityData = await getTrainerAvailability(id, fromStr, toStr)
         setSlots(availabilityData)
+
+        const reviewsData = await getTrainerReviews(id)
+        setReviews(reviewsData)
       } catch (err) {
         console.error('Failed to fetch trainer data', err)
       } finally {
@@ -52,62 +57,82 @@ export default function TrainerProfile() {
   if (!trainer) return <div className="p-8 text-gray-500">Trainer not found.</div>
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <button onClick={() => navigate('/trainers')} className="text-blue-600 hover:underline mb-6 block">
-          &larr; Back to Trainers
-        </button>
+      <div className="min-h-screen bg-gray-100">
+        <div className="max-w-2xl mx-auto px-4 py-8">
+          <button onClick={() => navigate('/trainers')} className="text-blue-600 hover:underline mb-6 block">
+            &larr; Back to Trainers
+          </button>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
-          <div className="flex items-center gap-6 mb-4">
-            <img src={trainer.photoUrl || 'https://i.pravatar.cc/300?img=12'} alt={trainer.firstName}
-              className="w-24 h-24 rounded-full object-cover" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">{trainer.firstName} {trainer.lastName}</h1>
-              <p className="text-gray-500">{trainer.specialization}</p>
-              <p className="text-yellow-500 font-medium">&#11088; {trainer.averageRating ?? 'N/A'}</p>
+          <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
+            <div className="flex items-center gap-6 mb-4">
+              <img src={trainer.photoUrl || 'https://i.pravatar.cc/300?img=12'} alt={trainer.firstName}
+                   className="w-24 h-24 rounded-full object-cover" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">{trainer.firstName} {trainer.lastName}</h1>
+                <p className="text-gray-500">{trainer.specialization}</p>
+                <p className="text-yellow-500 font-medium">&#11088; {trainer.averageRating ?? 'N/A'}</p>
+              </div>
             </div>
+            <p className="text-gray-600">{trainer.bio}</p>
+            {trainer.certifications && (
+                <p className="text-sm text-gray-400 mt-2">Certifications: {trainer.certifications}</p>
+            )}
           </div>
-          <p className="text-gray-600">{trainer.bio}</p>
-          {trainer.certifications && (
-            <p className="text-sm text-gray-400 mt-2">Certifications: {trainer.certifications}</p>
-          )}
-        </div>
 
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Available Slots</h2>
-          {slots.length === 0 ? (
-            <p className="text-gray-400 text-sm">No available slots in the next 7 days.</p>
-          ) : (
-            <div className="grid grid-cols-3 gap-3">
-              {slots.map((slot) => (
-                <button key={slot.id}
-                  onClick={() => !bookedSlots.includes(slot.id) && setSelectedSlot(slot)}
-                  className={`rounded-lg py-2 text-sm font-medium transition border ${
-                    bookedSlots.includes(slot.id)
-                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                      : 'border-blue-500 text-blue-600 hover:bg-blue-50'
-                  }`}>
-                  {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  <br />
-                  <span className="text-xs text-gray-400">
+          <div className="bg-white rounded-2xl shadow-sm p-6 mb-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Available Slots</h2>
+            {slots.length === 0 ? (
+                <p className="text-gray-400 text-sm">No available slots in the next 7 days.</p>
+            ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {slots.map((slot) => (
+                      <button key={slot.id}
+                              onClick={() => !bookedSlots.includes(slot.id) && setSelectedSlot(slot)}
+                              className={`rounded-lg py-2 text-sm font-medium transition border ${
+                                  bookedSlots.includes(slot.id)
+                                      ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                      : 'border-blue-500 text-blue-600 hover:bg-blue-50'
+                              }`}>
+                        {new Date(slot.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <br />
+                        <span className="text-xs text-gray-400">
                     {new Date(slot.startTime).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                   </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                      </button>
+                  ))}
+                </div>
+            )}
+          </div>
 
-      {selectedSlot && (
-        <BookingModal
-          trainer={trainer}
-          slot={new Date(selectedSlot.startTime).toLocaleString()}
-          onConfirm={handleConfirm}
-          onClose={() => setSelectedSlot(null)}
-        />
-      )}
-    </div>
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Reviews</h2>
+            {reviews.length === 0 ? (
+                <p className="text-gray-400 text-sm">No reviews yet.</p>
+            ) : (
+                <div className="space-y-4">
+                  {reviews.map(r => (
+                      <div key={r.id} className="border-b border-gray-100 pb-4 last:border-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-gray-800">{r.clientFullName}</span>
+                          <span className="text-yellow-500 text-sm">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                        </div>
+                        {r.comment && <p className="text-sm text-gray-600">{r.comment}</p>}
+                        <p className="text-xs text-gray-400 mt-1">{new Date(r.createdAt).toLocaleDateString()}</p>
+                      </div>
+                  ))}
+                </div>
+            )}
+          </div>
+        </div>
+
+        {selectedSlot && (
+            <BookingModal
+                trainer={trainer}
+                slot={new Date(selectedSlot.startTime).toLocaleString()}
+                onConfirm={handleConfirm}
+                onClose={() => setSelectedSlot(null)}
+            />
+        )}
+      </div>
   )
 }
