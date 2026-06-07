@@ -9,14 +9,14 @@ import com.fitschedule.fitschedule.app.model.entity.Trainer;
 import com.fitschedule.fitschedule.app.model.enums.TimeSlotStatus;
 import com.fitschedule.fitschedule.app.repository.TimeSlotRepository;
 import com.fitschedule.fitschedule.app.repository.TrainerRepository;
+import com.fitschedule.fitschedule.app.service.filter.FilterCriteria;
+import com.fitschedule.fitschedule.app.service.filter.TrainerFilterStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +25,21 @@ public class TrainerService {
 
     private final TrainerRepository trainerRepository;
     private final TimeSlotRepository timeSlotRepository;
+    // Spring injects all TrainerFilterStrategy @Component implementations
+    private final List<TrainerFilterStrategy> filterStrategies;
 
     public List<TrainerSummaryResponse> getAllTrainers(String specialization) {
-        List<Trainer> trainers = (specialization == null || specialization.isBlank())
-                ? trainerRepository.findAllByActiveTrue()
-                : trainerRepository.findAllByActiveTrueAndSpecializationIgnoreCase(specialization.trim());
+        List<Trainer> trainers = trainerRepository.findAllByActiveTrue();
+
+        FilterCriteria criteria = FilterCriteria.builder()
+                .specialization(specialization)
+                .build();
+
+        for (TrainerFilterStrategy strategy : filterStrategies) {
+            if (strategy.isApplicable(criteria)) {
+                trainers = strategy.filter(trainers, criteria);
+            }
+        }
 
         return trainers.stream()
                 .map(TrainerSummaryResponse::fromEntity)
@@ -44,7 +54,6 @@ public class TrainerService {
     }
 
     public List<TimeSlotResponse> getTrainerAvailability(Long trainerId, LocalDateTime from, LocalDateTime to) {
-        // verify trainer exists & active
         trainerRepository.findById(trainerId)
                 .filter(t -> Boolean.TRUE.equals(t.getActive()))
                 .orElseThrow(() -> new ResourceNotFoundException("Trainer not found with id " + trainerId));
@@ -59,21 +68,18 @@ public class TrainerService {
     }
 
     public List<TrainerSummaryResponse> searchAvailableTrainers(LocalDateTime from, LocalDateTime to) {
-        List<TimeSlot> availableSlots = timeSlotRepository
-                .findByStatusAndStartAtBetweenOrderByStartAt(
-                        TimeSlotStatus.AVAILABLE, from, to);
+        List<Trainer> trainers = trainerRepository.findAllByActiveTrue();
 
-        Set<Long> trainerIds = availableSlots.stream()
-                .map(slot -> slot.getTrainer().getId())
-                .collect(Collectors.toSet());
+        FilterCriteria criteria = FilterCriteria.builder()
+                .from(from)
+                .to(to)
+                .build();
 
-        if (trainerIds.isEmpty()) {
-            return List.of();
+        for (TrainerFilterStrategy strategy : filterStrategies) {
+            if (strategy.isApplicable(criteria)) {
+                trainers = strategy.filter(trainers, criteria);
+            }
         }
-
-        List<Trainer> trainers = trainerRepository.findAllById(trainerIds).stream()
-                .filter(t -> Boolean.TRUE.equals(t.getActive()))
-                .toList();
 
         return trainers.stream()
                 .map(TrainerSummaryResponse::fromEntity)

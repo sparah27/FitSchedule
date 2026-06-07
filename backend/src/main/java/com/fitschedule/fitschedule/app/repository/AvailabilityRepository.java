@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
     List<Availability> findByTrainerId(Long trainerId);
+
+    void deleteByTrainerId(Long trainerId);
 }

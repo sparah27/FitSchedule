@@ -12,7 +12,6 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-<<<<<<< HEAD
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -25,6 +24,3 @@ api.interceptors.response.use(
 )
 
 export default api
-=======
-export default api
->>>>>>> d6dbe8b820672b31a665999cf73d75fc74091425

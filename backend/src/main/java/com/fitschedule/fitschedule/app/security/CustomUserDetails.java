@@ -1,5 +1,6 @@
 package com.fitschedule.fitschedule.app.security;
 
+import com.fitschedule.fitschedule.app.model.entity.Admin;
 import com.fitschedule.fitschedule.app.model.entity.Client;
 import com.fitschedule.fitschedule.app.model.entity.Trainer;
 import com.fitschedule.fitschedule.app.model.entity.User;
@@ -21,7 +22,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         String role;
-        if (user instanceof Trainer) {
+        if (user instanceof Admin) {
+            role = "ROLE_ADMIN";
+        } else if (user instanceof Trainer) {
             role = "ROLE_TRAINER";
         } else if (user instanceof Client) {
             role = "ROLE_CLIENT";
